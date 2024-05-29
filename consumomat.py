@@ -7,19 +7,31 @@ import os
 
 # Carregar credenciais a partir da variável de ambiente
 creds_json = os.environ.get('GOOGLE_SHEETS_CREDENTIALS')
-creds_dict = json.loads(creds_json)
-gc = gspread.service_account_from_dict(creds_dict)
+
+# Corrigir o formato do JSON (escapar caracteres especiais)
+creds_json = creds_json.replace("\\n", "\n")
+
+try:
+    creds_dict = json.loads(creds_json)
+    gc = gspread.service_account_from_dict(creds_dict)
+except (TypeError, json.JSONDecodeError) as e:
+    st.error(f"Erro ao carregar as credenciais do Google Sheets: {e}")
+    st.stop()
 
 # Abrir a planilha (substitua pelo ID da sua planilha)
-sh = gc.open_by_key('1bt8THai3U3rOcVutZjwDkUm3A-G85MoagYlf6A0bYM0')  
-worksheet = sh.sheet1
+try:
+    sh = gc.open_by_key('1bt8THai3U3rOcVutZjwDkUm3A-G85MoagYlf6A0bYM0')
+    worksheet = sh.sheet1
+except gspread.exceptions.APIError as e:
+    st.error(f"Erro ao acessar a planilha: {e}")
+    st.stop()  
 
 # Carregar os dados da planilha
 try:
     df = pd.DataFrame(worksheet.get_all_records())
 except gspread.exceptions.APIError as e:
-    st.error(f"Erro ao acessar a planilha: {e}")
-    st.stop()  # Interrompe a execução se não conseguir carregar a planilha
+    st.error(f"Erro ao carregar os dados da planilha: {e}")
+    st.stop()  
 
 # Lista completa de técnicos 
 tecnicos = [
