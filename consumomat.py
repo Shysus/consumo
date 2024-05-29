@@ -9,7 +9,7 @@ import os
 creds_json = os.environ.get('GOOGLE_SHEETS_CREDENTIALS')
 
 # Verifique se as credenciais foram carregadas corretamente
-if creds_json is None:
+if not creds_json:
     st.error("As credenciais do Google Sheets não foram encontradas nas variáveis de ambiente.")
     st.stop()
 
