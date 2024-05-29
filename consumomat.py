@@ -14,9 +14,8 @@ if not creds_json:
     st.stop()
 
 # Corrigir o formato do JSON (escapar caracteres especiais)
-creds_json = creds_json.replace("\\\\n", "\n")
-
 try:
+    creds_json = creds_json.replace("\\n", "\n")
     creds_dict = json.loads(creds_json)
     gc = gspread.service_account_from_dict(creds_dict)
 except (TypeError, json.JSONDecodeError) as e:
