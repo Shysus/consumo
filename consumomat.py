@@ -58,7 +58,7 @@ quantidade_utilizada = st.number_input("Quantidade utilizada (em metros)", min_v
 
 # Verificação e cálculo do excedente
 if st.button("Enviar"):
-  data_atual = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+data_atual = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
   if quantidade_utilizada > limite_quantidade:
     excedente = quantidade_utilizada - limite_quantidade
     st.warning(f"Excedente detectado! O limite de {limite_quantidade} metros foi ultrapassado.")
