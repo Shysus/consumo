@@ -1,44 +1,18 @@
 import streamlit as st
-import pandas as pd
-from datetime import date
+from datetime import datetime
 import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 import json
-import os
 
-# Carregar credenciais a partir da variável de ambiente
-creds_json = os.environ.get('GOOGLE_SHEETS_CREDENTIALS')
+# Configurações do Google Sheets a partir dos segredos do Streamlit
+scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+creds_dict = json.loads(st.secrets["gspread_cred"])
+creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+client = gspread.authorize(creds)
+sheet = client.open_by_key("1bt8THai3U3rOcVutZjwDkUm3A-G85MoagYlf6A0bYM0").worksheet("CABOS")
 
-# Verifique se as credenciais foram carregadas corretamente
-if not creds_json:
-    st.error("As credenciais do Google Sheets não foram encontradas nas variáveis de ambiente.")
-    st.stop()
-
-# Corrigir o formato do JSON (escapar caracteres especiais)
-try:
-    creds_json = creds_json.replace("\\n", "\n")
-    creds_dict = json.loads(creds_json)
-    gc = gspread.service_account_from_dict(creds_dict)
-except (TypeError, json.JSONDecodeError) as e:
-    st.error(f"Erro ao carregar as credenciais do Google Sheets: {e}")
-    st.stop()
-
-# Abrir a planilha (substitua pelo ID da sua planilha)
-try:
-    sh = gc.open_by_key('1bt8THai3U3rOcVutZjwDkUm3A-G85MoagYlf6A0bYM0')
-    worksheet = sh.sheet1
-except gspread.exceptions.APIError as e:
-    st.error(f"Erro ao acessar a planilha: {e}")
-    st.stop()  
-
-# Carregar os dados da planilha
-try:
-    df = pd.DataFrame(worksheet.get_all_records())
-except gspread.exceptions.APIError as e:
-    st.error(f"Erro ao carregar os dados da planilha: {e}")
-    st.stop()  
-
-# Lista completa de técnicos 
-tecnicos = [
+# Lista de nomes técnicos
+nomes_tecnicos = [
     "ALEXANDRE GRANJEIRO VENTURA",
     "CHARLES DOS SANTOS VILHALVA",
     "GUILHERME DUARTE BARBOSA",
@@ -64,28 +38,37 @@ tecnicos = [
 # Material
 material = "22061736 - CABO DROP 1FO LOW F FIG8 LOW CINZA"
 
-# Interface Streamlit
-st.title("Controle de Material")
+# Limite de quantidade
+limite_quantidade = 86
 
-nome_tecnico = st.selectbox("Nome Técnico", tecnicos)
-st.write(f"Material: {material}")
+# Interface do usuário
+st.title("Controle de Material Utilizado")
 
-quantidade_utilizada = st.number_input("Quantidade Utilizada", min_value=0)
+# Seleção do Nome Técnico
+nome_tecnico = st.selectbox("Nome Técnico", nomes_tecnicos)
 
+# Campo para inserir o Contrato
+contrato = st.text_input("Contrato")
+
+# Seleção do Material
+st.write("Material:", material)
+
+# Entrada da Quantidade Utilizada
+quantidade_utilizada = st.number_input("Quantidade utilizada (em metros)", min_value=0, max_value=1000, step=1)
+
+# Verificação e cálculo do excedente
 if st.button("Enviar"):
-    if quantidade_utilizada > 86:
-        quantidade_extra = quantidade_utilizada - 86
-        nova_linha = [nome_tecnico, date.today(), material, quantidade_utilizada, quantidade_extra]
-        try:
-            worksheet.append_row(nova_linha)  # Adicionar a linha ao Google Sheets
-        except gspread.exceptions.APIError as e:
-            st.error(f"Erro ao adicionar dados à planilha: {e}")
-        else:
-            df = df.append(pd.Series(nova_linha, index=df.columns), ignore_index=True)  # Atualizar o DataFrame local
-            st.success(f"Dados adicionados à planilha! Quantidade extra: {quantidade_extra}")
+    data_atual = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+    if quantidade_utilizada > limite_quantidade:
+        excedente = quantidade_utilizada - limite_quantidade
+        st.warning(f"Excedente detectado! O limite de {limite_quantidade} metros foi ultrapassado.")
+        st.write(f"Nome Técnico: {nome_tecnico}")
+        st.write(f"Contrato: {contrato}")
+        st.write(f"Data: {data_atual}")
+        st.write(f"Excedente: {excedente} metros")
+        # Inserir dados no Google Sheets
+        sheet.append_row([data_atual, nome_tecnico, contrato, quantidade_utilizada, excedente])
     else:
-        st.info("Quantidade dentro do limite.")
-
-# Exibir o DataFrame (opcional)
-st.subheader("Dados Atuais:")
-st.dataframe(df)
+        st.success(f"A quantidade utilizada de {quantidade_utilizada} metros está dentro do limite de {limite_quantidade} metros.")
+        # Inserir dados no Google Sheets sem excedente
+        sheet.append_row([data_atual, nome_tecnico, contrato, quantidade_utilizada, 0])
