@@ -7,7 +7,12 @@ from datetime import datetime
 try:
     # Carregar credenciais do Google Sheets a partir dos segredos
     creds_dict = st.secrets["gspread_cred"]
-    creds = Credentials.from_service_account_info(creds_dict)
+    
+    # Definir os escopos necessários
+    SCOPE = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
+    
+    # Atualizar as credenciais para incluir os escopos
+    creds = Credentials.from_service_account_info(creds_dict, scopes=SCOPE)
 
     # Autenticar e acessar a planilha
     client = gspread.authorize(creds)
