@@ -69,6 +69,6 @@ if quantidade_utilizada > limite_quantidade:
 # Inserir dados no Google Sheets
     sheet.append_row([data_atual, nome_tecnico, contrato, quantidade_utilizada, excedente])
 else:
-st.success(f"A quantidade utilizada de {quantidade_utilizada} metros está dentro do limite de {limite_quantidade} metros.")
+    st.success(f"A quantidade utilizada de {quantidade_utilizada} metros está dentro do limite de {limite_quantidade} metros.")
 # Inserir dados no Google Sheets sem excedente
-sheet.append_row([data_atual, nome_tecnico, contrato, quantidade_utilizada, 0])
+    sheet.append_row([data_atual, nome_tecnico, contrato, quantidade_utilizada, 0])
