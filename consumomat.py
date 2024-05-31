@@ -4,6 +4,12 @@ import gspread
 from google.oauth2.service_account import Credentials
 from datetime import datetime
 
+# Verificar segredos
+try:
+    st.write(st.secrets["gspread_cred"])
+except Exception as e:
+    st.error(f"Erro ao acessar o segredo: {e}")
+
 # Configurações para Google Sheets
 SCOPE = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 creds_dict = json.loads(st.secrets["gspread_cred"])
@@ -59,4 +65,3 @@ if st.button("Registrar"):
         resto = quantidade_utilizada - 86
         registrar_consumo(nome_tecnico, contrato, 86, data_registro)
         st.warning(f"A quantidade utilizada excede o limite. Resto: {resto} MTS")
-
