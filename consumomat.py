@@ -13,7 +13,7 @@ sheet = client.open_by_key("1bt8THai3U3rOcVutZjwDkUm3A-G85MoagYlf6A0bYM0").works
 
 # Lista de nomes técnicos
 nomes_tecnicos = [
-  "ALEXANDRE GRANJEIRO VENTURA",
+  "ALEXANDRE GRANJEIRO",
   "CHARLES DOS SANTOS VILHALVA",
   "GUILHERME DUARTE BARBOSA",
   "GUILHERME MATOS ZANDONA",
