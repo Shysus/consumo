@@ -2,11 +2,11 @@ import streamlit as st
 from datetime import datetime
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
-import json
+import toml  # Importe a biblioteca toml
 
 # Configurações do Google Sheets a partir dos segredos do Streamlit
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-creds_dict = json.loads(st.secrets["gspread_cred"])
+creds_dict = toml.loads(st.secrets["gspread_cred"])  # Carregue as credenciais usando toml.loads()
 creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
 client = gspread.authorize(creds)
 sheet = client.open_by_key("1bt8THai3U3rOcVutZjwDkUm3A-G85MoagYlf6A0bYM0").worksheet("CABOS")
