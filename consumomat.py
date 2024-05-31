@@ -60,15 +60,15 @@ quantidade_utilizada = st.number_input("Quantidade utilizada (em metros)", min_v
 if st.button("Enviar"):
 data_atual = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 if quantidade_utilizada > limite_quantidade:
-    excedente = quantidade_utilizada - limite_quantidade
-    st.warning(f"Excedente detectado! O limite de {limite_quantidade} metros foi ultrapassado.")
-    st.write(f"Nome Técnico: {nome_tecnico}")
-    st.write(f"Contrato: {contrato}")
-    st.write(f"Data: {data_atual}")
-    st.write(f"Excedente: {excedente} metros")
+excedente = quantidade_utilizada - limite_quantidade
+st.warning(f"Excedente detectado! O limite de {limite_quantidade} metros foi ultrapassado.")
+st.write(f"Nome Técnico: {nome_tecnico}")
+st.write(f"Contrato: {contrato}")
+st.write(f"Data: {data_atual}")
+st.write(f"Excedente: {excedente} metros")
     # Inserir dados no Google Sheets
-    sheet.append_row([data_atual, nome_tecnico, contrato, quantidade_utilizada, excedente])
-  else:
-    st.success(f"A quantidade utilizada de {quantidade_utilizada} metros está dentro do limite de {limite_quantidade} metros.")
+sheet.append_row([data_atual, nome_tecnico, contrato, quantidade_utilizada, excedente])
+else:
+st.success(f"A quantidade utilizada de {quantidade_utilizada} metros está dentro do limite de {limite_quantidade} metros.")
     # Inserir dados no Google Sheets sem excedente
-    sheet.append_row([data_atual, nome_tecnico, contrato, quantidade_utilizada, 0])
+sheet.append_row([data_atual, nome_tecnico, contrato, quantidade_utilizada, 0])
