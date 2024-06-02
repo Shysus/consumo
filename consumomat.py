@@ -1,7 +1,16 @@
 import streamlit as st
 from datetime import date
+import firebase_admin
+from firebase_admin import credentials, db
+import json
+import os
 
-st.title("Sistema de Controle de Material")
+# Carregar credenciais do Firebase a partir do segredo do Streamlit Cloud
+cred_json = json.loads(st.secrets["firebase_credentials"]) 
+cred = credentials.Certificate(cred_json)
+
+# Inicializar o Firebase
+firebase_admin.initialize_app(cred, {'databaseURL': st.secrets["database_url"]})
 
 # Dados dos técnicos e materiais (completos)
 tecnicos = [
@@ -31,18 +40,12 @@ materiais = {
     "22061736 - CABO DROP 1FO LOW F FIG8 LOW CINZA": 86,  # Limite em metros
 }
 
-# Seleção do técnico
+# Interface do Streamlit
+st.title("Sistema de Controle de Material")
+
 tecnico_selecionado = st.selectbox("Nome Técnico:", tecnicos)
-
-# Seleção do material
 material_selecionado = st.selectbox("Material:", list(materiais.keys()))
-
-# Quantidade utilizada
-quantidade_utilizada = st.number_input(
-    "Quantidade utilizada (metros):", min_value=0
-)
-
-# Contrato
+quantidade_utilizada = st.number_input("Quantidade utilizada (metros):", min_value=0)
 contrato = st.text_input("Contrato:")
 
 # Botão para calcular
@@ -51,12 +54,29 @@ if st.button("Calcular"):
     limite_material = materiais[material_selecionado]
     if quantidade_utilizada > limite_material:
         resto = quantidade_utilizada - limite_material
-        st.warning(f"A quantidade utilizada excede o limite de {limite_material} metros.")
+        st.warning(
+            f"A quantidade utilizada excede o limite de {limite_material} metros."
+        )
         st.write(
             f"**Técnico:** {tecnico_selecionado}\n"
             f"**Data:** {date.today().strftime('%d/%m/%Y')}\n"
             f"**Resto:** {resto} metros\n"
             f"**Contrato:** {contrato}"
         )
+
+    # Enviar dados para o Firebase
+    ref = db.reference("registros")
+    novo_registro = ref.push(
+        {
+            "tecnico": tecnico_selecionado,
+            "material": material_selecionado,
+            "quantidade": quantidade_utilizada,
+            "data": date.today().strftime("%d/%m/%Y"),
+            "contrato": contrato,
+        }
+    )
+
+    if novo_registro.key:
+        st.success("Dados salvos com sucesso no Firebase!")
     else:
-        st.success("Quantidade dentro do limite.")
+        st.error("Erro ao salvar os dados no Firebase.")
