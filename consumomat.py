@@ -2,7 +2,7 @@ import streamlit as st
 from datetime import date
 import firebase_admin
 from firebase_admin import credentials, db
-import tomllib
+import toml
 import os
 
 # Carregar credenciais do Firebase a partir do segredo do Streamlit Cloud
